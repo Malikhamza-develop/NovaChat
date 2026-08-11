@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --color-primary: #4F46E5;
+    --color-secondary: #2563EB;
+    --color-accent: #0EA5E9;
+    --color-background: #F4F7FF;
+    --color-surface: #FFFFFF;
+    --color-surface-alt: #EFF5FF;
+    --color-card: #FFFFFF;
+    --color-text: #111827;
+    --color-text-secondary: #475569;
+    --color-text-muted: #64748B;
+    --color-border: #CBD5E1;
+    --color-shadow: rgba(15, 23, 42, 0.08);
+    --color-placeholder: #94A3B8;
+    --color-danger: #EF4444;
+    --color-success: #16A34A;
+    --color-online: #22C55E;
+    --color-message-sent: #2563EB;
+    --color-message-received: #E5E7EB;
+  }
+
+  .dark {
+    --color-primary: #6366F1;
+    --color-secondary: #3B82F6;
+    --color-accent: #0EA5E9;
+    --color-background: #0B1120;
+    --color-surface: #1E293B;
+    --color-surface-alt: #172033;
+    --color-card: #1E293B;
+    --color-text: #F1F5F9;
+    --color-text-secondary: #94A3B8;
+    --color-text-muted: #64748B;
+    --color-border: #334155;
+    --color-shadow: rgba(0, 0, 0, 0.4);
+    --color-placeholder: #64748B;
+    --color-danger: #EF4444;
+    --color-success: #22C55E;
+    --color-online: #22C55E;
+    --color-message-sent: #2563EB;
+    --color-message-received: #334155;
+  }
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  user-select: none;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.5);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(51, 65, 85, 0.6);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(71, 85, 105, 0.8);
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.02); }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 2.5s infinite ease-in-out;
+}
