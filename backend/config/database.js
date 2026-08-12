@@ -1,48 +1,24 @@
 const mongoose = require("mongoose");
-const { MongoMemoryServer } = require("mongodb-memory-server");
-
-let mongod = null;
 
 const connectDB = async () => {
   const uri = process.env.MONGO_URI || process.env.MONGODB_URI;
 
-  if (uri) {
-    try {
-      await mongoose.connect(uri, {
-        serverSelectionTimeoutMS: 5000,
-      });
-
-      console.log("MongoDB Connected successfully");
-      return;
-    } catch (error) {
-      console.warn(
-        "Could not connect to remote MongoDB:",
-        error.message
-      );
-    }
+  if (!uri) {
+    console.error("MONGO_URI is not configured");
+    process.exit(1);
   }
 
   try {
-    console.log(
-      "Initializing embedded MongoDB server..."
-    );
+    await mongoose.connect(uri, {
+      serverSelectionTimeoutMS: 10000,
+    });
 
-    mongod = await MongoMemoryServer.create();
-
-    const memoryUri = mongod.getUri();
-
-    await mongoose.connect(memoryUri);
-
-    console.log(
-      "Connected to embedded MongoDB instance:",
-      memoryUri
-    );
+    console.log("MongoDB Connected successfully");
   } catch (error) {
-    console.error(
-      "Failed to start MongoDB Memory Server:",
-      error.message
-    );
+    console.error("MongoDB connection failed:", error.message);
+    process.exit(1);
   }
 };
 
 module.exports = connectDB;
+
