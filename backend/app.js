@@ -5,7 +5,8 @@ const cors = require("cors");
 const authRoutes = require("./routes/authRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const userRoutes = require('./routes/userRoutes');
-const aiRoutes = require('./routes/aiRoutes');
+// Temporarily disabled - AI integration will be restored later.
+// const aiRoutes = require('./routes/aiRoutes');
 const rateLimiter = require("./middleware/rateLimiter");
 
 
@@ -43,7 +44,8 @@ app.use(
 );
 
 app.use('/api/users', userRoutes);
-app.use('/api/ai', aiRoutes);
+// Temporarily disabled - AI integration will be restored later.
+// app.use('/api/ai', aiRoutes);
 
 
 
