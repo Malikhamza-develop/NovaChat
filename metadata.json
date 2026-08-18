@@ -1,0 +1,6 @@
+{
+  "name": "NovaChat",
+  "description": "Real-time cross-platform messaging web application with chat threads, typing indicators, status checkmarks, reactions, archive, and customizable themes.",
+  "requestFramePermissions": ["camera", "microphone", "geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
