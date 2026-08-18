@@ -1,98 +1,53 @@
 const mongoose = require("mongoose");
 
-
-
 const userSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
-{
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
 
-name:{
+    password: {
+      type: String,
+      required: true,
+    },
 
-type:String,
+    avatar: {
+      type: String,
+      default: "",
+    },
 
-required:true,
+    isOnline: {
+      type: Boolean,
+      default: false,
+    },
 
-trim:true,
+    lastSeen: {
+      type: Date,
+      default: null,
+    },
 
-},
-
-
-
-email:{
-
-type:String,
-
-required:true,
-
-unique:true,
-
-lowercase:true,
-
-trim:true,
-
-},
-
-
-
-password:{
-
-type:String,
-
-required:true,
-
-},
-
-
-
-avatar:{
-
-type:String,
-
-default:"",
-
-},
-
-
-
-isOnline:{
-
-type:Boolean,
-
-default:false,
-
-},
-
-
-
-lastSeen:{
-
-type:Date,
-
-default:null,
-
-},
-
-
-},
-
-
-{
-
-timestamps:true,
-
-}
-
+    fcmTokens: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
+  },
+  {
+    timestamps: true,
+  }
 );
 
-
-
-
-
-const User = mongoose.model(
-"User",
-userSchema
-);
-
-
+const User = mongoose.model("User", userSchema);
 
 module.exports = User;

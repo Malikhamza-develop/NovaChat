@@ -18,6 +18,13 @@ import {
   AuthResponse,
 } from '../types/Auth';
 
+import {
+  initializeFCM,
+  setupFCMTokenRefresh,
+  setupFCMForegroundListener,
+  removeFCMToken,
+} from '../services/fcmService';
+
 const ONBOARDING_STORAGE_KEY = 'has_seen_onboarding';
 
 const storage = {
@@ -52,6 +59,7 @@ interface AuthState {
   user: User | null;
   loading: boolean;
   hasSeenOnboarding: boolean;
+  fcmUnsubscribers: (() => void)[];
 
   loadAuth: () => Promise<void>;
   finishOnboarding: () => Promise<void>;
@@ -60,11 +68,36 @@ interface AuthState {
   updateProfile: (updates: Partial<User>) => Promise<void>;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+const startFCM = async (set: (partial: Partial<AuthState>) => void) => {
+  try {
+    await initializeFCM();
+
+    const unsubscribeRefresh = setupFCMTokenRefresh();
+    const unsubscribeForeground = setupFCMForegroundListener();
+
+    set({
+      fcmUnsubscribers: [unsubscribeRefresh, unsubscribeForeground],
+    });
+  } catch (error) {
+    console.log('FCM init error:', error);
+  }
+};
+
+const stopFCM = async (unsubscribers: (() => void)[]) => {
+  try {
+    unsubscribers.forEach((unsubscribe) => unsubscribe());
+    await removeFCMToken();
+  } catch (error) {
+    console.log('FCM teardown error:', error);
+  }
+};
+
+export const useAuthStore = create<AuthState>((set, get) => ({
   token: null,
   user: null,
   loading: true,
   hasSeenOnboarding: false,
+  fcmUnsubscribers: [],
 
   loadAuth: async () => {
     try {
@@ -89,6 +122,8 @@ export const useAuthStore = create<AuthState>((set) => ({
         } catch (error) {
           console.log('Socket init error:', error);
         }
+
+        await startFCM(set);
 
         try {
           const currentUser = await getCurrentUser();
@@ -157,6 +192,8 @@ export const useAuthStore = create<AuthState>((set) => ({
         error
       );
     }
+
+    await startFCM(set);
   },
 
   finishOnboarding: async () => {
@@ -203,6 +240,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     await storage.removeItem('token');
     await storage.removeItem('user');
 
+    await stopFCM(get().fcmUnsubscribers);
+
     disconnectSocket();
     require('./chatStore').useChatStore.getState().resetOnLogout();
 
@@ -210,6 +249,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       token: null,
       user: null,
       loading: false,
+      fcmUnsubscribers: [],
     });
 
     if (navigationRef.isReady()) {
