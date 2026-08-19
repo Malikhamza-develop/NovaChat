@@ -84,3 +84,8 @@ backend/.env
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# Firebase Admin credentials
+*-firebase-admin*.json
+firebase-admin*.json
+service-account*.json

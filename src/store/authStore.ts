@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+﻿import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
@@ -237,10 +237,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   logout: async () => {
+    await stopFCM(get().fcmUnsubscribers);
+
+    disconnectSocket();
+
     await storage.removeItem('token');
     await storage.removeItem('user');
-
-    await stopFCM(get().fcmUnsubscribers);
 
     disconnectSocket();
     require('./chatStore').useChatStore.getState().resetOnLogout();

@@ -7,7 +7,84 @@ const {
 
 const User = require("../models/User");
 const Message = require("../models/Message");
+const { sendPushNotification } = require("../services/fcmService");
 
+const sendOfflinePushNotification = async ({
+  recipientId,
+  senderId,
+  message,
+}) => {
+  try {
+    const recipient = await User.findById(recipientId)
+      .select("fcmTokens")
+      .lean();
+
+    if (!recipient?.fcmTokens?.length) {
+      console.log(`No FCM tokens for recipient ${recipientId}`);
+      return;
+    }
+
+    const sender = await User.findById(senderId)
+      .select("name avatar")
+      .lean();
+
+    const result = await sendPushNotification({
+      tokens: recipient.fcmTokens,
+      title: sender?.name || "New message",
+      body:
+        message.type === "text"
+          ? message.content || "New message"
+          : message.type === "image"
+            ? "?? Image"
+            : message.type === "video"
+              ? "?? Video"
+              : message.type === "audio"
+                ? "?? Audio"
+                : message.type === "voice"
+                  ? "?? Voice message"
+                  : "New message",
+      data: {
+        type: "chat_message",
+        messageId: message._id,
+        senderId,
+        recipientId,
+        conversationUserId: senderId,
+      },
+    });
+
+    console.log(
+      `FCM push sent: ${result.successCount} successful, ${result.failureCount} failed`
+    );
+
+    const invalidTokens = result.failedTokens
+      .filter((item) =>
+        [
+          "messaging/registration-token-not-registered",
+          "messaging/invalid-registration-token",
+        ].includes(item.errorCode)
+      )
+      .map((item) => item.token);
+
+    if (invalidTokens.length > 0) {
+      await User.findByIdAndUpdate(recipientId, {
+        $pull: {
+          fcmTokens: {
+            $in: invalidTokens,
+          },
+        },
+      });
+
+      console.log(
+        `Removed ${invalidTokens.length} invalid FCM token(s)`
+      );
+    }
+  } catch (error) {
+    console.error(
+      "Offline FCM notification error:",
+      error.message
+    );
+  }
+};
 const registerSocketHandlers = (io, socket) => {
   // socket.userId is set by socketAuth middleware
   const userId = socket.userId;
@@ -100,6 +177,22 @@ const registerSocketHandlers = (io, socket) => {
         });
       }
 
+      // Recipient is offline: send Firebase push notification.
+      if (targetSocketIds.length === 0) {
+        await sendOfflinePushNotification({
+          recipientId: toUserId,
+          senderId: userId,
+          message: msg,
+        });
+      }
+      // Recipient is offline: send Firebase push notification.
+      if (targetSocketIds.length === 0) {
+        await sendOfflinePushNotification({
+          recipientId: toUserId,
+          senderId: userId,
+          message: msg,
+        });
+      }
       // emit to sender (ack) and include clientId so client can reconcile optimistic message
       const msgForSender = { ...msg, clientId: clientId || msg.clientId };
       io.to(socket.id).emit("message:sent", msgForSender);
@@ -313,3 +406,9 @@ const registerSocketHandlers = (io, socket) => {
 };
 
 module.exports = registerSocketHandlers;
+
+
+
+
+
+
