@@ -64,7 +64,7 @@ interface AuthState {
   loadAuth: () => Promise<void>;
   finishOnboarding: () => Promise<void>;
   login: (data: AuthResponse) => Promise<void>;
-  logout: () => Promise<void>;
+  logout: () => Promise<void>; 
   updateProfile: (updates: Partial<User>) => Promise<void>;
 }
 
